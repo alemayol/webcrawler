@@ -33,6 +33,16 @@ int Visualizador::aumentarNivelDeProfundidad() {
   return nivel;
 }
 
+int Visualizador::aumentarPaginasMaximas() {
+  int pags = 0;
+
+  std::cout
+      << "Ingrese el numero maximo de paginas a visitar (no mas de 300): ";
+  std::cin >> pags;
+  this->limpiarBuffer();
+  return pags;
+}
+
 std::string Visualizador::obtenerURL() {
 
   std::string web;

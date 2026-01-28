@@ -11,6 +11,7 @@ public:
   void displayMenu();
   std::string obtenerURL();
   int aumentarNivelDeProfundidad();
+  int aumentarPaginasMaximas();
   void mostrarMetricas(WebpageMetrics metricas);
   std::string buscarPalabraClave();
   void limpiarBuffer();

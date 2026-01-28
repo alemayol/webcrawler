@@ -11,7 +11,8 @@ public:
   };
   FailedConnectionException(std::string message) { this->message = message; };
 
+  virtual const char *what() const throw() { return this->message.c_str(); }
+
 private:
   std::string message;
-  virtual const char *what() const throw() { return this->message.c_str(); }
 };

@@ -29,6 +29,7 @@ public:
   bool compararDominios(std::string url1, std::string url2);
   std::string obtenerDominio(std::string foundUrl, std::string abaseUrl);
   static std::string limpiarLink(std::string currUrl, std::string baseUrl);
+  static std::string completarUrl(std::string url);
   void printLinks();
   Response getResponse();
 

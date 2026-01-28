@@ -13,7 +13,6 @@
 #include <libxml/xmlmemory.h>
 #include <libxml2/libxml/HTMLparser.h>
 #include <libxml2/libxml/xpath.h>
-#include <unordered_set>
 
 // Constructores
 HttpHandler::HttpHandler() { curl_global_init(CURL_GLOBAL_ALL); };
@@ -81,19 +80,16 @@ std::string HttpHandler::getRequest(std::string uri) {
   this->connection = curl_easy_perform(curl);
 
   if (this->connection != CURLE_OK) {
+    curl_easy_cleanup(curl);
     std::string error = "No se pudo establecer una conexion con la URL "
                         "proporcionada. Por favor ingrese una URL valida: ";
-    throw new FailedConnectionException(
+
+    throw FailedConnectionException(
         error.append(curl_easy_strerror(this->connection)));
   }
 
   // Finalizar la sesion de curl
   curl_easy_cleanup(curl);
-  // std::cout << "Curl Cleanup..." << std::endl;
-
-  // Sumamos el link visitado a un set no ordernado para no volver a hacer una
-  // peticion a la mismo URL mas de una vez
-  // this->linksVisitados.insert(uri);
 
   std::string res;
 
@@ -105,8 +101,6 @@ std::string HttpHandler::getRequest(std::string uri) {
 
   return res;
 }
-
-// Response HttpHandler::getResponse() { return this->response; }
 
 std::vector<std::string> HttpHandler::findLinks(std::string html,
                                                 std::string currentUrl,
@@ -134,7 +128,6 @@ std::vector<std::string> HttpHandler::findLinks(std::string html,
     // Mientras i sea menor al numero de nodos (etiquetas) encontradas en el
     // html
 
-    std::cout << "Found tags: " << a_tags->nodesetval->nodeNr << std::endl;
     for (int i = 0; i < a_tags->nodesetval->nodeNr; i++) {
       xmlChar *href = xmlNodeListGetString(
           doc, a_tags->nodesetval->nodeTab[i]->children, 1);
@@ -143,29 +136,21 @@ std::vector<std::string> HttpHandler::findLinks(std::string html,
         std::string linkStr = (char *)
             href; // Recasteamos el puntero xmlChar a un puntero char* (string)
 
-        /*
-        if (linkStr[0] == '#' || linkStr[0] == '?' || linkStr.empty()) {
-          xmlFree(href);
-          continue;
-        }
-*/
-        // Si el link proviene del mismo dominio, lo agregamos a la cola de
-        // links a crawlear
-        // std::cout << "Original href link: " << linkStr << std::endl;
+        // "Normalizamos" el link antes de analizarlo
         linkStr = this->limpiarLink(linkStr, currentUrl);
 
-        // std::cout << "Finding link" << linkStr << std::endl;
+        // Si tenemos un link vacio, procedemos con la siguiente iteracion
         if (linkStr.empty()) {
           continue;
         }
 
+        // Si el link proviene del mismo dominio, lo agregamos a la cola de
+        // links a crawlear
         if (this->obtenerDominio(linkStr, currentUrl) == targetDomain) {
-          // std::cout << "-------------------------" << std::endl;
-          // std::cout << linkStr << " Current url: " << currentUrl <<
-          // std::endl; std::cout << "Target domain: " << targetDomain <<
-          // std::endl;
           foundLinks.push_back(linkStr);
         } else {
+          // De lo contrario es un link que lleva a otro dominio, lo sumamos a
+          // las metricas
           metricas.foreignLinks++;
         }
 
@@ -174,24 +159,36 @@ std::vector<std::string> HttpHandler::findLinks(std::string html,
     }
   }
 
+  // La cantidad de nodos de etiquetas img encontrados es la cantidad de
+  // imagenes que tiene la pagina actual
   metricas.nroImages += img_tags->nodesetval->nodeNr;
 
-  /*
-  if (img_tags && img_tags->nodesetval) {
-    for (int i = 0; i < img_tags->nodesetval->nodeNr; i++) {
-
-    }
-  }
-*/
   xmlXPathFreeObject(a_tags);
   xmlXPathFreeObject(img_tags);
   xmlFreeDoc(doc);
 
   return foundLinks;
-  // return metricas;
+}
+
+std::string HttpHandler::completarUrl(std::string url) {
+  // Eliminamos salots de linea o espacios en blanco
+  url.erase(0, url.find_first_not_of(" \t\n\r"));
+  url.erase(url.find_last_not_of(" \t\n\r") + 1);
+
+  if (url.empty())
+    return "";
+
+  if (url.find("://") == std::string::npos) {
+    url = "https://" + url;
+  }
+
+  return url;
 }
 
 std::string HttpHandler::limpiarLink(std::string currUrl, std::string baseUrl) {
+
+  if (baseUrl.empty())
+    currUrl = completarUrl(currUrl);
 
   CURLU *str1 = curl_url();
   char *linkLimpio = nullptr;
@@ -210,11 +207,10 @@ std::string HttpHandler::limpiarLink(std::string currUrl, std::string baseUrl) {
     // En caso de ser ingresado un protocolo en mayusculas, lo minimizaremos
     if (curl_url_get(str1, CURLUPART_SCHEME, &urlPart, 0) == CURLUE_OK) {
       std::string protocolo = urlPart;
-      // std::cout << "PROTOCOLO ENCONTRADO: " << protocolo << std::endl;
       std::transform(protocolo.begin(), protocolo.end(), protocolo.begin(),
                      ::tolower);
-      curl_url_set(str1, CURLUPART_SCHEME, protocolo.c_str(), 0);
-      // curl_url_set(str1, CURLUPART_SCHEME, "https://", 0);
+      // curl_url_set(str1, CURLUPART_SCHEME, protocolo.c_str(), 0);
+      curl_url_set(str1, CURLUPART_SCHEME, "https", 0);
       curl_free(urlPart);
       urlPart = nullptr;
     }
@@ -249,14 +245,6 @@ std::string HttpHandler::limpiarLink(std::string currUrl, std::string baseUrl) {
       res.pop_back();
   }
 
-  /*
-  if (curl_url_get(str1, CURLUPART_URL, &linkLimpio, 0) == CURLUE_OK) {
-    res = linkLimpio;
-    curl_free(linkLimpio);
-  }
-  */
-
-  // std::cout << "Response: " << res << std::endl;
   return res;
 }
 

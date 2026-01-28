@@ -13,6 +13,7 @@
 class Crawler {
 public:
   Crawler(int depth);
+  Crawler(int depth, int maxPag);
   Crawler(std::string startUrl, int depth);
   void analizarPagina(std::string url);
   std::vector<std::string> buscarFrase(std::string palabra);

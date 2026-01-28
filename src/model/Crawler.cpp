@@ -2,9 +2,11 @@
 #include "../../include/model/FailedConnectionException.h"
 #include "../../include/model/HttpHandler.h"
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <queue>
+#include <thread>
 #include <unordered_map>
 
 Crawler::Crawler(int depth) {
@@ -14,6 +16,8 @@ Crawler::Crawler(int depth) {
   } else {
     this->nivelProfundidad = depth;
   }
+
+  this->maxPag = 100;
 }
 
 Crawler::Crawler(std::string url, int depth) {
@@ -23,11 +27,30 @@ Crawler::Crawler(std::string url, int depth) {
   } else {
     this->nivelProfundidad = depth;
   }
+
+  this->maxPag = 100;
+}
+
+Crawler::Crawler(int depth, int paginas) {
+  if (depth > 50) {
+    this->nivelProfundidad = 2;
+
+  } else {
+    this->nivelProfundidad = depth;
+  }
+
+  if (paginas > 300) {
+    this->maxPag = 200;
+  } else {
+
+    this->maxPag = 100;
+  }
 }
 
 void Crawler::analizarPagina(std::string url) {
   HttpHandler http = HttpHandler();
   int nivelActual = 0;
+  int contPags = 0;
 
   // Limpiando datos anteriores
   this->linksVisitados.clear();
@@ -37,44 +60,32 @@ void Crawler::analizarPagina(std::string url) {
   // Nodo cabeza en el map no ordenado
   this->allFoundLinks.insert({url, "none"});
 
-  while (nivelActual <= this->nivelProfundidad && !this->foundLinks.empty()) {
+  std::cout << "🕷️ Transversando links, por favor espere..." << std::endl;
+  while (nivelActual <= this->nivelProfundidad && contPags <= this->maxPag &&
+         !this->foundLinks.empty()) {
 
-    std::cout << "Nivel actual: " << nivelActual << std::endl;
-    // std::cout << "Nivel de profundidad: " << this->nivelProfundidad
-    //          << std::endl;
     // Obtenemos el frente de la cola y lo quitamos de ella
     std::string currentURL = this->foundLinks.front();
     this->foundLinks.pop();
 
-    std::cout << "🕷️ Transversando links, por favor espere..." << std::endl;
-    std::cout << "Actual: " << currentURL << std::endl;
-
-    // unordered_set.find retorna un iterador al elemento si es encontrado, de
-    // lo contrario retorna el iterador end(), por lo tanto, si es != end(),
-    // significa que ya lo visitamos
-    // if (this->linksVisitados.find(currentURL) != this->linksVisitados.end())
-    // {
-    // std::cout << "Ya visitado: " << currentURL << std::endl;
-    // continue;
-    // }
-
     this->linksVisitados.insert(currentURL);
     // Visitamos la url actual
     try {
+      // std::this_thread::sleep_for(std::chrono::milliseconds(100));
       std::string res = http.getRequest(currentURL);
+
+      contPags++; // Se visito una pagina, se aumenta el conteo
 
       std::vector<std::string> links =
           http.findLinks(res, currentURL, this->metricas);
 
-      std::cout << "Links encontrados: " << links.size() << std::endl;
-
       for (std::string &link : links) {
 
-        std::cout << "🕷️ Link actual: " << link << std::endl;
-
+        // unordered_set.find retorna un iterador al elemento si es encontrado,
+        // de lo contrario retorna el iterador end(), por lo tanto, si es !=
+        // end(), significa que ya lo visitamos
         if (this->linksVisitados.find(link) == this->linksVisitados.end()) {
-
-          std::cout << "🕷️ Link actual aceptado: " << link << std::endl;
+          std::cout << "Actual: " << link << std::endl;
           this->linksVisitados.insert(link);
           this->foundLinks.push(link);
           this->metricas.sameDomainLinks++;
@@ -86,10 +97,12 @@ void Crawler::analizarPagina(std::string url) {
       }
 
     } catch (FailedConnectionException &e) {
-      std::cout << "Failed to reach website" << std::endl;
+      std::cout << e.what() << std::endl;
       continue;
     } catch (std::exception &e) {
+      std::cout << "Failed to reach website" << std::endl;
       std::cout << e.what() << std::endl;
+      continue;
     }
 
     nivelActual++;
@@ -111,7 +124,8 @@ std::vector<std::string> Crawler::buscarFrase(std::string palabra) {
        i++) {
 
     if (i->first.find(palabra) != std::string::npos) {
-      std::cout << "✨ Keyword '" << palabra << "' found!" << std::endl;
+      std::cout << "\nPalabra clave '" << palabra << "' encontrada!"
+                << std::endl;
       urlMatch = i->first;
       palabraEncontrada = true;
       break;
@@ -143,7 +157,7 @@ void Crawler::setAllFoundLinks(
 void Crawler::setProfundidad(int n) {
   if (n > 20) {
 
-    std::cout << "Nivel de profundidad maxima excedido. Nivel establecido: 10"
+    std::cout << "Nivel de profundidad maxima excedido. Nivel establecido: 20"
               << std::endl;
     this->nivelProfundidad = 20;
   } else {
@@ -157,6 +171,9 @@ int Crawler::getMaxPaginas() { return this->maxPag; }
 
 void Crawler::setMaxPaginas(int p) {
   if (p > 150) {
+    std::cout << "Paginas maximas excedidas. Numero establecido: 100"
+              << std::endl;
+
     this->maxPag = 100;
   } else {
     this->maxPag = p;
