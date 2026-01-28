@@ -5,7 +5,7 @@
 #include <limits>
 #include <vector>
 
-Visualizador::Visualizador() { this->opcionMenu = 0; }
+Visualizador::Visualizador() {}
 
 void Visualizador::limpiarBuffer() {
 
@@ -72,11 +72,11 @@ void Visualizador::printShortestPath(std::vector<std::string> urls) {
 
   unsigned int depth = 0;
 
-  std::cout << "\n\n🏁 Shortest Path (" << urls.size() - 1
+  std::cout << "\n\nCamino mas corto (" << urls.size() - 1
             << " links desde la url indicada):" << std::endl;
 
   for (std::string url : urls) {
-    // Print indentation
+    // Identacion
     for (int i = 0; i < depth; ++i) {
       if (i == depth - 1) {
         std::cout << "|-- ";

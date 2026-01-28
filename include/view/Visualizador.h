@@ -15,7 +15,4 @@ public:
   void mostrarMetricas(WebpageMetrics metricas);
   std::string buscarPalabraClave();
   void limpiarBuffer();
-
-private:
-  int opcionMenu;
 };

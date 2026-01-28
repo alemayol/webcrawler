@@ -1,6 +1,6 @@
 #include "../model/Crawler.h"
 #include <string>
-#include <unordered_map>
+
 class GestorJSON {
 public:
   static bool guardarArchivo(std::string nombreA, Crawler *crawler);

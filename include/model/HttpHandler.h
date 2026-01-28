@@ -1,10 +1,8 @@
 #pragma once
+#define HTTPHANDLER_H
 
 #include "WebpageMetrics.h"
-#include <unordered_set>
-#define HTTPHANDLER_H
-#include <deque>
-#include <queue>
+#include <vector>
 
 #include <curl/curl.h>
 #include <string>

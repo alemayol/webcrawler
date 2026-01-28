@@ -2,11 +2,9 @@
 #include "../../include/model/FailedConnectionException.h"
 #include "../../include/model/HttpHandler.h"
 #include <algorithm>
-#include <chrono>
 #include <exception>
 #include <iostream>
 #include <queue>
-#include <thread>
 #include <unordered_map>
 
 Crawler::Crawler(int depth) {
@@ -60,7 +58,7 @@ void Crawler::analizarPagina(std::string url) {
   // Nodo cabeza en el map no ordenado
   this->allFoundLinks.insert({url, "none"});
 
-  std::cout << "🕷️ Transversando links, por favor espere..." << std::endl;
+  std::cout << "Navegando links, por favor espere..." << std::endl;
   while (nivelActual <= this->nivelProfundidad && contPags <= this->maxPag &&
          !this->foundLinks.empty()) {
 
@@ -71,7 +69,6 @@ void Crawler::analizarPagina(std::string url) {
     this->linksVisitados.insert(currentURL);
     // Visitamos la url actual
     try {
-      // std::this_thread::sleep_for(std::chrono::milliseconds(100));
       std::string res = http.getRequest(currentURL);
 
       contPags++; // Se visito una pagina, se aumenta el conteo
@@ -85,7 +82,6 @@ void Crawler::analizarPagina(std::string url) {
         // de lo contrario retorna el iterador end(), por lo tanto, si es !=
         // end(), significa que ya lo visitamos
         if (this->linksVisitados.find(link) == this->linksVisitados.end()) {
-          std::cout << "Actual: " << link << std::endl;
           this->linksVisitados.insert(link);
           this->foundLinks.push(link);
           this->metricas.sameDomainLinks++;
