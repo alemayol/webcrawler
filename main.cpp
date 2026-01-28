@@ -1,10 +1,8 @@
 #include "include/data/GestorJSON.h"
 #include "include/model/Crawler.h"
-#include "include/model/HttpHandler.h"
 #include "include/view/Visualizador.h"
 #include <cstdlib>
 #include <curl/curl.h>
-#include <exception>
 #include <iostream>
 
 const std::string NOMBRE_ARCHIVO = "crawler_database.json";

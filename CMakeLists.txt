@@ -14,7 +14,7 @@ find_package(nlohmann_json QUIET REQUIRED)
 find_package(LibXml2 QUIET REQUIRED)
 find_package(CURL QUIET REQUIRED)
 
-add_executable(${PROJECT_NAME} ./main.cpp ./src/model/HttpHandler.cpp ./src/model/Crawler.cpp ./src/view/Visualizador.cpp ./src/data/GestJSON.cpp)
+add_executable(${PROJECT_NAME} ./main.cpp ./src/model/HttpHandler.cpp ./src/model/Crawler.cpp ./src/view/Visualizador.cpp ./src/data/GestorJSON.cpp)
 
 # Linking libraries
 target_link_libraries(${PROJECT_NAME} LibXml2::LibXml2 CURL::libcurl ${PSL_LIB} nlohmann_json::nlohmann_json)

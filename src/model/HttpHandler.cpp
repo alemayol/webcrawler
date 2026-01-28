@@ -209,8 +209,8 @@ std::string HttpHandler::limpiarLink(std::string currUrl, std::string baseUrl) {
       std::string protocolo = urlPart;
       std::transform(protocolo.begin(), protocolo.end(), protocolo.begin(),
                      ::tolower);
-      // curl_url_set(str1, CURLUPART_SCHEME, protocolo.c_str(), 0);
-      curl_url_set(str1, CURLUPART_SCHEME, "https", 0);
+      curl_url_set(str1, CURLUPART_SCHEME, protocolo.c_str(), 0);
+      // curl_url_set(str1, CURLUPART_SCHEME, "https", 0);
       curl_free(urlPart);
       urlPart = nullptr;
     }
