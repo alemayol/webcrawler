@@ -52,10 +52,8 @@ std::string Visualizador::buscarPalabraClave() {
 void Visualizador::mostrarMetricas(WebpageMetrics metricas) {
   std::cout << "-------- Metricas del sitio web --------" << std::endl;
 
-  std::cout << "Paginas foraneas: " << metricas.foreignLinks.size()
-            << std::endl;
-  std::cout << "Paginas analizadas: " << metricas.sameDomainLinks.size()
-            << std::endl;
+  std::cout << "Paginas foraneas: " << metricas.foreignLinks << std::endl;
+  std::cout << "Paginas analizadas: " << metricas.sameDomainLinks << std::endl;
   std::cout << "Imagenes totales en paginas analizadas: " << metricas.nroImages
             << std::endl;
 }

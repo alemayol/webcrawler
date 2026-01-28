@@ -52,10 +52,11 @@ void Crawler::analizarPagina(std::string url) {
     // unordered_set.find retorna un iterador al elemento si es encontrado, de
     // lo contrario retorna el iterador end(), por lo tanto, si es != end(),
     // significa que ya lo visitamos
-    if (this->linksVisitados.find(currentURL) != this->linksVisitados.end()) {
-      std::cout << "Ya visitado: " << currentURL << std::endl;
-      continue;
-    }
+    // if (this->linksVisitados.find(currentURL) != this->linksVisitados.end())
+    // {
+    // std::cout << "Ya visitado: " << currentURL << std::endl;
+    // continue;
+    // }
 
     this->linksVisitados.insert(currentURL);
     // Visitamos la url actual
@@ -74,7 +75,9 @@ void Crawler::analizarPagina(std::string url) {
         if (this->linksVisitados.find(link) == this->linksVisitados.end()) {
 
           std::cout << "🕷️ Link actual aceptado: " << link << std::endl;
+          this->linksVisitados.insert(link);
           this->foundLinks.push(link);
+          this->metricas.sameDomainLinks++;
 
           // Almacenamos todos los links unicos encontrados para metricas
           if (this->allFoundLinks.find(link) == this->allFoundLinks.end())
@@ -132,6 +135,11 @@ std::vector<std::string> Crawler::buscarFrase(std::string palabra) {
   return camino;
 }
 
+void Crawler::setAllFoundLinks(
+    std::unordered_map<std::string, std::string> allFoundLinks) {
+  this->allFoundLinks = allFoundLinks;
+}
+
 void Crawler::setProfundidad(int n) {
   if (n > 20) {
 
@@ -143,13 +151,31 @@ void Crawler::setProfundidad(int n) {
   }
 }
 
+int Crawler::getProfundidad() { return this->nivelProfundidad; }
+
+int Crawler::getMaxPaginas() { return this->maxPag; }
+
+void Crawler::setMaxPaginas(int p) {
+  if (p > 150) {
+    this->maxPag = 100;
+  } else {
+    this->maxPag = p;
+  }
+}
+
+std::unordered_map<std::string, std::string> Crawler::getGrafo() {
+  return this->allFoundLinks;
+}
+
+void Crawler::setMetricas(WebpageMetrics metrics) { this->metricas = metrics; }
+
 WebpageMetrics Crawler::getMetricas() { return this->metricas; }
 
 void Crawler::printLinks() {
 
   std::cout << "Numero imagenes: " << this->metricas.nroImages << std::endl;
-  std::cout << "Numero de links foraneos: "
-            << this->metricas.foreignLinks.size() << std::endl;
+  std::cout << "Numero de links foraneos: " << this->metricas.foreignLinks
+            << std::endl;
 
   for (auto i = this->allFoundLinks.begin(); i != this->allFoundLinks.end();
        i++) {

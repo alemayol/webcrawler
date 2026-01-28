@@ -164,10 +164,9 @@ std::vector<std::string> HttpHandler::findLinks(std::string html,
           // std::cout << linkStr << " Current url: " << currentUrl <<
           // std::endl; std::cout << "Target domain: " << targetDomain <<
           // std::endl;
-          metricas.sameDomainLinks.push_back(linkStr);
           foundLinks.push_back(linkStr);
         } else {
-          metricas.foreignLinks.push_back(linkStr);
+          metricas.foreignLinks++;
         }
 
         xmlFree(href);

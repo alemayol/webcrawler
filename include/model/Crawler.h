@@ -16,8 +16,15 @@ public:
   Crawler(std::string startUrl, int depth);
   void analizarPagina(std::string url);
   std::vector<std::string> buscarFrase(std::string palabra);
+  int getProfundidad();
+  int getMaxPaginas();
+  void setMaxPaginas(int p);
+  void
+  setAllFoundLinks(std::unordered_map<std::string, std::string> allFoundLinks);
+  std::unordered_map<std::string, std::string> getGrafo();
   void setProfundidad(int n);
   void printLinks();
+  void setMetricas(WebpageMetrics metricas);
   WebpageMetrics getMetricas();
 
 private:

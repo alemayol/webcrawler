@@ -1,3 +1,4 @@
+#include "include/data/GestorJSON.h"
 #include "include/model/Crawler.h"
 #include "include/model/HttpHandler.h"
 #include "include/view/Visualizador.h"
@@ -6,9 +7,12 @@
 #include <exception>
 #include <iostream>
 
+const std::string NOMBRE_ARCHIVO = "crawler_database.json";
+
 int main(int argc, char *argv[]) {
 
   Crawler *crawler = nullptr;
+  GestorJSON gestor = GestorJSON();
   Visualizador menu = Visualizador();
   int opcionMenu = -1;
 
@@ -48,6 +52,14 @@ int main(int argc, char *argv[]) {
         // Cargar metricas desde archivo
       case 2: {
         std::cout << "Intentando cargar datos desde archivo..." << std::endl;
+        bool exito = gestor.cargarArchivo(NOMBRE_ARCHIVO, crawler);
+        if (!exito) {
+          std::cout << "No se ha podido cargar el archivo" << std::endl;
+          break;
+        }
+
+        std::cout << "Archivo cargado exitosamente" << std::endl;
+
         break;
       }
         // Buscar palabra clave en URLs
@@ -55,8 +67,6 @@ int main(int argc, char *argv[]) {
 
         std::string palabra = menu.buscarPalabraClave();
         std::vector<std::string> camino = crawler->buscarFrase(palabra);
-
-        std::cout << "Camino vacio: " << camino.empty() << std::endl;
 
         if (camino.empty()) {
           std::cout
@@ -67,12 +77,21 @@ int main(int argc, char *argv[]) {
         menu.printShortestPath(camino);
         break;
       }
+        // Mostras metricas del analisis
       case 4: {
         menu.mostrarMetricas(crawler->getMetricas());
         break;
       }
+        // Guardar datos en archivo
       case 5: {
         std::cout << "Guardando datos analizados en memoria..." << std::endl;
+        bool exito = gestor.guardarArchivo(NOMBRE_ARCHIVO, crawler);
+        if (!exito) {
+          std::cout << "No se ha podido guardar el archivo" << std::endl;
+          break;
+        }
+
+        std::cout << "Archivo guardado exitosamente" << std::endl;
         break;
       }
       default: {
